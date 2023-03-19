@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        body{
+            font-family: Roboto;
+        }
+        h1{
+            text-align: center;
+        }
+        .grid{
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+        .grid__form{
+            position: relative;
+        }
+        form{
+            display: block;
+            margin: auto;
+            width: 90%;
+        }
+        form input{
+            display: block;
+            margin: 10px auto;
+            width: 90%;
+            height: 35px;
+            border-radius: 5px;
+            outline: none;
+            border: 1px solid #000;
+            padding: 0 0 0 20px;
+            box-sizing: border-box;
+        }
+        form input[type='submit']{
+            #width: 40%;
+            background: darkgreen;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        form textarea{
+            display: block;
+            width: 90%;
+            margin: 10px auto;
+            border-radius: 10px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .error{
+            width: 90%;
+            margin: 10px auto;
+            background: #fd0101;
+            color: #fff;
+            font-weight: bold;
+            font-style: italic;
+            padding: 0 20px;
+            height: 35px;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            border-radius: 5px;
+            border: 1px solid darkred;
+            font-size: 14px;
+        }
+        .like{
+            border: none;
+            background: none;
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>Извините, но тут не без приколов:)</h1>
+    </header>
+    <div class="grid">
+        <div class="grid__form">
+            <form name="review">
+                <input type="text" name="name" placeholder="ваше имя" value="" >
+                <input type="email" name="email"  placeholder="ваш email" value="">
+                <input type="date" name="date" placeholder="выберите дату" value="">
+                <textarea name="textarea" id="" cols="30" rows="10"></textarea>
+                <input type="submit" name="submit" value="имеет смысл нажимать, только когда все поля заполнены...:)">
+            </form>
+        </div>
+        <div class="comments">
+        </div>
+    </div>
+
+
+    <script>
+        "use strict"
+
+        let form = document.forms.review;
+        let pattern = "([A-z0-9_.-]{1,})@([A-z0-9_.-]{1,}).([A-z]{2,8})";
+        let errorDiv = document.createElement('div');
+        let h1Height = document.querySelector('h1').offsetHeight;
+        let comments = document.querySelector('.comments');
+        let date = 'бла-бла-бла';
+        let count = 0;
+        let removePhrases = [
+            'Удалить отзыв',
+            'Убрать этот бред',
+            'Хосподи, шо за фигня?? убрать',
+            'No estoy de acuerdo con eso',
+            'Remove this',
+            'посоветуем советующему научиться писать например',
+            'не согласные мы',
+            'no me gusta esto',
+            'не комильфо',
+            'вспоминая Зощенко: "экий ты, милочка, ротозей"'
+
+        ]
+        let name,
+            email,
+            text;
+
+
+
+        // showError:
+        // добавляем див с общим классом и классом конкретного инпута (текстареа)
+        // устанавливаем высоту для него и текст, который будет отображаться в нем
+        function showError(elem, text){
+            elem.after(errorDiv);
+            errorDiv.className = `error ${elem.name}`;
+            errorDiv.innerHTML = `<p>${text};</p>`;
+        }
+
+        // далее для инпутов и текстареа - примерно одинаковые действия,
+        // при незаполнении
+        form.name.onblur = function(){
+            if (this.value.length == 0) showError(this, 'Не заполнено поле имя');
+            else name = this.value;
+            if (name) return name;
+        };
+
+        form.name.onfocus = () => {if (name) errorDiv.remove()};
+
+        form.email.onblur = function(){
+            if (!this.value.match(pattern)) showError(this,
+                'Ваш email некорректный! Введите, пожалуйста, корректный email!');
+            else email = this.value;
+            if (email) return email;
+        };
+
+        function getDate(day) {
+          return ['year', 'month', 'day'].map(e => new Intl.DateTimeFormat('en', {
+            [e]: 'numeric',
+          }).format(day).padStart(2, '0')).join('-');
+        }
+
+        form.date.onblur = function (){
+            if (date === 'бла-бла-бла') {
+                date = getDate(new Date());
+                this.value = date;
+            }
+            return date;
+        }
+
+        form.date.onchange = function (){
+            date = this.value;
+            return date;
+        }
+
+
+
+        form.email.onfocus = () => {if (errorDiv.classList.contains('email')) errorDiv.remove()};
+
+        form.textarea.onblur = function(){
+            if (this.value.length == 0 ) showError(this, 'Заполните комментарий!');
+
+            else text = this.value;
+
+            if (text) return text;
+        };
+
+        form.textarea.onfocus = () => {if (errorDiv.classList.contains('textarea')) errorDiv.remove()};
+
+        form.onsubmit = function(e){
+            e.preventDefault();
+
+            if (name && email && text) {
+                if (errorDiv) errorDiv.remove();
+
+                setTimeout(e.target.reset(), 1000);
+
+                setTimeout(comments.insertAdjacentHTML('afterbegin', `
+                        <div class="comments__item">
+                            <h3>${name}</h3>
+                            <h4>${email}</h4>
+                            <h4>${date}</h4>
+                            <p>${text}</p>
+                            <button class="remove">${removePhrases[Math.floor(Math.random() * 10)]}</button>
+                            <button class="like">&#x1F44D; ${count}</button>
+                        </div>
+                            `), 2000);
+                name, email, text = '';
+            } else{
+                showError(this, 'Мы же вас предупреждали:)');
+            }
+
+            let like = document.querySelector('.like');
+            like.onclick = (count) => count++;
+
+            let removeButton = document.querySelectorAll('.remove');
+            removeButton.forEach(function (rb) {
+                rb.addEventListener('click', () => rb.parentNode.remove());
+            });
+
+        }
+
+    </script>
+</body>
+</html>
